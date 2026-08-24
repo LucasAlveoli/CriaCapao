@@ -27,6 +27,14 @@
   --slate: #5B5A63;
   --slate-light: #E7E2D3;
 
+  /* ---- Frente palette: rotates across the poster's full color range ---- */
+  --f-red: #C1272D; --f-red-ink: #FFF6E9;
+  --f-blue: #2158A0; --f-blue-ink: #FFF6E9;
+  --f-green: #2E7D46; --f-green-ink: #FFF6E9;
+  --f-gold: #E8AA3D; --f-gold-ink: #1B2438;
+  --f-teal: #1F7A72; --f-teal-ink: #FFF6E9;
+  --f-navy: #2E3A54; --f-navy-ink: #FFF6E9;
+
   --radius: 3px;
   --radius-sm: 2px;
   --border-w: 2px;
@@ -62,6 +70,8 @@ a { color: inherit; }
   padding: 22px 24px 0;
   overflow: hidden;
   border-bottom: 4px solid var(--navy);
+  box-shadow: 0 4px 0 0 var(--gold), 0 8px 0 0 var(--blue), 0 12px 0 0 var(--green);
+  margin-bottom: 12px;
 }
 
 .topbar::before {
@@ -88,14 +98,6 @@ a { color: inherit; }
   align-items: center;
   gap: 12px;
   flex-wrap: wrap;
-}
-
-.wordmark::before {
-  content: '★';
-  color: var(--gold);
-  font-size: 22px;
-  line-height: 1;
-  transform: translateY(-1px);
 }
 
 .wordmark h1 {
@@ -186,8 +188,19 @@ a { color: inherit; }
 }
 .tab-btn:hover { background: var(--navy); }
 .tab-btn.active {
-  color: var(--navy);
-  background: var(--gold);
+  color: var(--white);
+  background: var(--navy);
+}
+.tab-btn[data-view="cronograma"] { background: var(--f-red); }
+.tab-btn[data-view="semana"] { background: var(--f-blue); }
+.tab-btn[data-view="marcos"] { background: var(--f-gold); color: var(--navy); }
+.tab-btn[data-view="tarefas"] { background: var(--f-green); }
+.tab-btn.active[data-view="cronograma"],
+.tab-btn.active[data-view="semana"],
+.tab-btn.active[data-view="marcos"],
+.tab-btn.active[data-view="tarefas"] {
+  background: var(--navy);
+  color: var(--white);
 }
 
 /* ---------- Main container ---------- */
@@ -302,6 +315,12 @@ main {
   transform: skewX(-12deg);
   display: inline-block;
 }
+.tag-red { background: var(--f-red); color: var(--f-red-ink); }
+.tag-blue { background: var(--f-blue); color: var(--f-blue-ink); }
+.tag-green { background: var(--f-green); color: var(--f-green-ink); }
+.tag-gold { background: var(--f-gold); color: var(--f-gold-ink); }
+.tag-teal { background: var(--f-teal); color: var(--f-teal-ink); }
+.tag-navy { background: var(--f-navy); color: var(--f-navy-ink); }
 
 .week-entregas {
   margin-top: 10px;
@@ -399,9 +418,15 @@ main {
   font-weight: 700;
   text-transform: uppercase;
   letter-spacing: 0.04em;
-  color: var(--red);
+  color: var(--f-red);
   margin-bottom: 3px;
 }
+.task-frente.c-red { color: var(--f-red); }
+.task-frente.c-blue { color: var(--f-blue); }
+.task-frente.c-green { color: var(--f-green); }
+.task-frente.c-gold { color: var(--gold-dark); }
+.task-frente.c-teal { color: var(--f-teal); }
+.task-frente.c-navy { color: var(--f-navy); }
 .task-name { font-weight: 700; font-size: 14.5px; margin: 2px 0 4px; }
 .task-entregavel { font-size: 13px; color: var(--gray); }
 .task-meta {
@@ -461,6 +486,10 @@ main {
   padding: 16px;
   box-shadow: var(--shadow-hard-sm);
 }
+.marco-card:nth-of-type(4n+1) { border-top-color: var(--f-red); }
+.marco-card:nth-of-type(4n+2) { border-top-color: var(--f-blue); }
+.marco-card:nth-of-type(4n+3) { border-top-color: var(--f-gold); }
+.marco-card:nth-of-type(4n+4) { border-top-color: var(--f-green); }
 .marco-card .marco-periodo {
   font-family: var(--font-mono);
   font-size: 12px;
