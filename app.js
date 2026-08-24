@@ -298,6 +298,106 @@
     });
   }
 
+  // ---------- render: calendário ----------
+
+  var MONTHS_PT = ['Janeiro', 'Fevereiro', 'Março', 'Abril', 'Maio', 'Junho', 'Julho', 'Agosto', 'Setembro', 'Outubro', 'Novembro', 'Dezembro'];
+  var WEEKDAYS_PT = ['DOM', 'SEG', 'TER', 'QUA', 'QUI', 'SEX', 'SÁB'];
+
+  function sameDate(a, b) {
+    return a.getFullYear() === b.getFullYear() && a.getMonth() === b.getMonth() && a.getDate() === b.getDate();
+  }
+
+  function enumerateMonths(start, end) {
+    var months = [];
+    var cur = new Date(start.getFullYear(), start.getMonth(), 1);
+    var last = new Date(end.getFullYear(), end.getMonth(), 1);
+    while (cur <= last) {
+      months.push({ year: cur.getFullYear(), month: cur.getMonth() });
+      cur = new Date(cur.getFullYear(), cur.getMonth() + 1, 1);
+    }
+    return months;
+  }
+
+  // Marcos guardam o período como texto livre (ex: "26/10 – 30/10" ou "19/11").
+  // Extrai as datas dd/mm citadas e devolve um Map dia -> [nomes de marco].
+  function marcoDayMap(year, month) {
+    var map = {};
+    state.marcos.forEach(function (m) {
+      var matches = String(m.periodo || '').match(/\d{1,2}\/\d{1,2}/g);
+      if (!matches) return;
+      var dates = matches.map(function (s) {
+        var parts = s.split('/');
+        return { day: parseInt(parts[0], 10), month: parseInt(parts[1], 10) - 1 };
+      });
+      var start = dates[0];
+      var end = dates.length > 1 ? dates[1] : dates[0];
+      // varre só dentro do mês pedido (evita lidar com virada de mês/ano aqui,
+      // já que o projeto inteiro cabe no mesmo ano)
+      if (start.month === month || end.month === month || (start.month < month && end.month > month)) {
+        var dayFrom = (start.month === month) ? start.day : 1;
+        var dayTo = (end.month === month) ? end.day : new Date(year, month + 1, 0).getDate();
+        for (var d = dayFrom; d <= dayTo; d++) {
+          (map[d] = map[d] || []).push(m.marco);
+        }
+      }
+    });
+    return map;
+  }
+
+  function renderCalendario() {
+    var el = document.getElementById('calendarView');
+    if (!state.tasks.length) { el.innerHTML = '<div class="state-msg">Nenhuma tarefa cadastrada ainda.</div>'; return; }
+    var start = parseISODate(CONFIG.WEEK_START);
+    var end = addDays(start, 7 * CONFIG.N_WEEKS - 1);
+    var months = enumerateMonths(start, end);
+    el.innerHTML = months.map(renderMonthGrid).join('');
+  }
+
+  function renderMonthGrid(m) {
+    var daysInMonth = new Date(m.year, m.month + 1, 0).getDate();
+    var startWeekday = new Date(m.year, m.month, 1).getDay();
+    var cells = [];
+    for (var i = 0; i < startWeekday; i++) cells.push(null);
+    for (var d = 1; d <= daysInMonth; d++) cells.push(d);
+    while (cells.length % 7 !== 0) cells.push(null);
+
+    var milestones = marcoDayMap(m.year, m.month);
+
+    var rows = '';
+    for (var w = 0; w < cells.length / 7; w++) {
+      var rowCells = cells.slice(w * 7, w * 7 + 7);
+      rows += '<div class="cal-row">' + rowCells.map(function (day) {
+        if (day === null) return '<div class="cal-cell cal-empty"></div>';
+        var dateObj = new Date(m.year, m.month, day);
+        var dayTasks = state.tasks.filter(function (t) {
+          var ti = parseISODate(t.inicio), tf = parseISODate(t.fim);
+          return ti && tf && dateObj >= ti && dateObj <= tf;
+        });
+        var isMilestone = milestones[day];
+        var milestoneLabel = isMilestone
+          ? '<div class="cal-milestone-label">🚩 ' + escapeHtml(uniquePreserveOrder(isMilestone).join(', ')) + '</div>'
+          : '';
+        var shown = dayTasks.slice(0, 3);
+        var chips = shown.map(function (t) {
+          var doneCls = t.status === 'Concluído' ? ' done' : '';
+          return '<div class="cal-chip tag-' + frenteColorClass(t.frente) + doneCls + '" title="' + escapeHtml(t.frente + ': ' + t.tarefa) + '">' + escapeHtml(t.frente) + '</div>';
+        }).join('');
+        var more = dayTasks.length > 3 ? '<div class="cal-more">+' + (dayTasks.length - 3) + ' mais</div>' : '';
+        return '<div class="cal-cell' + (isMilestone ? ' cal-milestone' : '') + '">' +
+          '<div class="cal-daynum">' + day + '</div>' + milestoneLabel + chips + more +
+          '</div>';
+      }).join('') + '</div>';
+    }
+
+    return (
+      '<div class="calendar-month">' +
+        '<h3 class="cal-month-title">' + MONTHS_PT[m.month] + ' ' + m.year + '</h3>' +
+        '<div class="cal-weekdays">' + WEEKDAYS_PT.map(function (w) { return '<div>' + w + '</div>'; }).join('') + '</div>' +
+        rows +
+      '</div>'
+    );
+  }
+
   // ---------- render: marcos ----------
 
   function renderMarcos() {
@@ -367,6 +467,7 @@
   function renderAll() {
     renderCronograma();
     renderSemana();
+    renderCalendario();
     renderMarcos();
     renderTarefas();
     syncAddTaskForm();
@@ -390,6 +491,10 @@
   document.getElementById('weekSelect').addEventListener('change', function (e) {
     state.selectedWeekIndex = parseInt(e.target.value, 10);
     renderSemana();
+  });
+
+  document.getElementById('printBtn').addEventListener('click', function () {
+    window.print();
   });
 
   // ---------- edit mode ----------
