@@ -18,14 +18,18 @@
     </div>
     <div class="topbar-meta">
       <span class="updated-at" id="updatedAt">carregando dados…</span>
-      <button class="edit-toggle" id="editToggle" type="button">
-        <span class="dot"></span>
-        <span id="editToggleLabel">Modo visualização</span>
-      </button>
+      <div class="topbar-actions">
+        <button class="print-btn" id="printBtn" type="button" title="Imprimir a aba atual">🖶 Imprimir</button>
+        <button class="edit-toggle" id="editToggle" type="button">
+          <span class="dot"></span>
+          <span id="editToggleLabel">Modo visualização</span>
+        </button>
+      </div>
     </div>
     <nav class="tabs" role="tablist">
       <button class="tab-btn active" data-view="cronograma" role="tab">Cronograma</button>
       <button class="tab-btn" data-view="semana" role="tab">Semana</button>
+      <button class="tab-btn" data-view="calendario" role="tab">Calendário</button>
       <button class="tab-btn" data-view="marcos" role="tab">Marcos</button>
       <button class="tab-btn" data-view="tarefas" role="tab">Tarefas</button>
     </nav>
@@ -58,6 +62,17 @@
     </div>
     <div id="weekTasks">
       <div class="state-msg">Carregando tarefas…</div>
+    </div>
+  </section>
+
+  <!-- CALENDÁRIO -->
+  <section class="view" id="view-calendario">
+    <div class="view-header">
+      <h2>Calendário</h2>
+      <p>Mês a mês, do início ao fim do projeto. Marcos aparecem destacados.</p>
+    </div>
+    <div id="calendarView">
+      <div class="state-msg">Carregando calendário…</div>
     </div>
   </section>
 
