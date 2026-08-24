@@ -162,6 +162,28 @@ a { color: inherit; }
 }
 .edit-toggle.active .dot { background: var(--red); }
 
+.topbar-actions {
+  display: flex;
+  align-items: center;
+  gap: 10px;
+}
+
+.print-btn {
+  font-family: var(--font-body);
+  font-size: 12.5px;
+  font-weight: 700;
+  text-transform: uppercase;
+  letter-spacing: 0.03em;
+  background: var(--gold);
+  border: var(--border-w) solid var(--navy);
+  color: var(--navy);
+  padding: 6px 14px;
+  border-radius: var(--radius-sm);
+  cursor: pointer;
+  transition: transform 0.1s ease;
+}
+.print-btn:hover { transform: translateY(-1px); }
+
 /* ---------- Tabs (poster placards) ---------- */
 
 .tabs {
@@ -193,10 +215,12 @@ a { color: inherit; }
 }
 .tab-btn[data-view="cronograma"] { background: var(--f-red); }
 .tab-btn[data-view="semana"] { background: var(--f-blue); }
+.tab-btn[data-view="calendario"] { background: var(--f-teal); }
 .tab-btn[data-view="marcos"] { background: var(--f-gold); color: var(--navy); }
 .tab-btn[data-view="tarefas"] { background: var(--f-green); }
 .tab-btn.active[data-view="cronograma"],
 .tab-btn.active[data-view="semana"],
+.tab-btn.active[data-view="calendario"],
 .tab-btn.active[data-view="marcos"],
 .tab-btn.active[data-view="tarefas"] {
   background: var(--navy);
@@ -702,6 +726,112 @@ footer {
     color: var(--gray-soft);
     margin-bottom: 2px;
   }
+}
+
+/* ---------- Calendário ---------- */
+
+.calendar-month {
+  background: var(--white);
+  border: var(--border-w) solid var(--navy);
+  border-radius: var(--radius);
+  padding: 16px;
+  margin-bottom: 20px;
+  box-shadow: var(--shadow-hard-sm);
+}
+.cal-month-title {
+  font-family: var(--font-display);
+  font-weight: 400;
+  text-transform: uppercase;
+  font-size: 20px;
+  color: var(--navy);
+  margin: 0 0 12px;
+  letter-spacing: 0.01em;
+}
+.cal-weekdays, .cal-row {
+  display: grid;
+  grid-template-columns: repeat(7, 1fr);
+  gap: 4px;
+}
+.cal-weekdays { margin-bottom: 6px; }
+.cal-weekdays div {
+  font-family: var(--font-mono);
+  font-size: 10.5px;
+  font-weight: 700;
+  text-align: center;
+  color: var(--gray);
+  text-transform: uppercase;
+}
+.cal-row { margin-bottom: 4px; }
+.cal-cell {
+  min-height: 78px;
+  border: 1px solid var(--cream-mid);
+  border-radius: 2px;
+  padding: 4px;
+  background: var(--paper);
+  overflow: hidden;
+}
+.cal-cell.cal-empty { background: transparent; border-color: transparent; }
+.cal-daynum {
+  font-family: var(--font-mono);
+  font-size: 11px;
+  font-weight: 700;
+  color: var(--navy);
+  margin-bottom: 3px;
+}
+.cal-cell.cal-milestone {
+  border: 2px solid var(--red);
+  background: var(--gold-light);
+}
+.cal-cell.cal-milestone .cal-daynum { color: var(--red); }
+.cal-milestone-label {
+  font-size: 8.5px;
+  font-weight: 700;
+  text-transform: uppercase;
+  color: var(--red-status);
+  margin-bottom: 2px;
+  line-height: 1.2;
+}
+.cal-chip {
+  font-size: 8.5px;
+  font-weight: 700;
+  text-transform: uppercase;
+  padding: 1px 4px;
+  border-radius: 2px;
+  margin-bottom: 2px;
+  white-space: nowrap;
+  overflow: hidden;
+  text-overflow: ellipsis;
+}
+.cal-chip.done { opacity: 0.5; text-decoration: line-through; }
+.cal-more {
+  font-size: 8.5px;
+  color: var(--gray-soft);
+  font-weight: 700;
+}
+
+@media (max-width: 640px) {
+  .cal-cell { min-height: 58px; padding: 2px; }
+  .cal-chip, .cal-more, .cal-milestone-label { font-size: 7.5px; }
+  .cal-weekdays div { font-size: 9px; }
+}
+
+/* ---------- Print ---------- */
+
+@media print {
+  * { -webkit-print-color-adjust: exact; print-color-adjust: exact; }
+  body { background: white; }
+  .topbar::before { display: none; }
+  .topbar { box-shadow: none; }
+  .tabs, .print-btn, .edit-toggle, .add-task-card, .modal-backdrop, .toast, footer,
+  .week-picker select, .status-select { display: none !important; }
+  .view { display: none !important; }
+  .view.active { display: block !important; }
+  main { padding: 12px 0; max-width: 100%; }
+  .calendar-month, .week-node, .marco-card, .task-card, .table-wrap {
+    box-shadow: none;
+    break-inside: avoid;
+  }
+  .timeline::before { background: var(--navy); }
 }
 
 @media (prefers-reduced-motion: reduce) {
