@@ -64,6 +64,18 @@
     return out;
   }
 
+  var FRENTE_COLORS = ['red', 'blue', 'green', 'gold', 'teal', 'navy'];
+  var frenteColorCache = {};
+  function frenteColorClass(frente) {
+    if (!frente) return 'red';
+    if (frenteColorCache[frente]) return frenteColorCache[frente];
+    var hash = 0;
+    for (var i = 0; i < frente.length; i++) hash = (hash * 31 + frente.charCodeAt(i)) >>> 0;
+    var cls = FRENTE_COLORS[hash % FRENTE_COLORS.length];
+    frenteColorCache[frente] = cls;
+    return cls;
+  }
+
   function toast(message, isError) {
     var el = document.getElementById('toast');
     el.textContent = message;
@@ -87,13 +99,20 @@
         state.loaded = true;
         document.getElementById('updatedAt').textContent =
           'atualizado ' + new Date(data.updatedAt).toLocaleTimeString('pt-BR');
+        if (!state.tasks.length) {
+          var debugUrl = CONFIG.API_URL + (CONFIG.API_URL.indexOf('?') >= 0 ? '&' : '?') + 'action=debug';
+          document.getElementById('timeline').innerHTML =
+            '<div class="state-msg">Conectei com o Apps Script, mas a base de tarefas voltou vazia. ' +
+            'Normalmente é o script apontando para a planilha errada. Abra <a href="' + debugUrl + '" target="_blank" rel="noopener">esta URL de diagnóstico</a> ' +
+            'e confira se o nome da planilha e as abas listadas são os certos.</div>';
+        }
         renderAll();
       })
       .catch(function (err) {
         console.error(err);
         document.getElementById('updatedAt').textContent = 'erro ao carregar';
         document.getElementById('timeline').innerHTML =
-          '<div class="state-msg error">Não consegui carregar os dados. Confira se a URL do Apps Script em config.js está correta e se a planilha está compartilhada com o app.</div>';
+          '<div class="state-msg error">Não consegui carregar os dados (' + escapeHtml(err.message || '') + '). Confira se a URL do Apps Script em config.js está correta e se foi implantada com acesso "Qualquer pessoa".</div>';
       });
   }
 
@@ -186,7 +205,7 @@
       var pct = w.total ? Math.round((w.done / w.total) * 100) : 0;
       var cls = w.total === 0 ? 'status-empty' : (w.done === w.total ? 'status-done' : 'status-progress');
       var focoTags = w.foco.length
-        ? w.foco.map(function (f) { return '<span class="tag">' + escapeHtml(f) + '</span>'; }).join('')
+        ? w.foco.map(function (f) { return '<span class="tag tag-' + frenteColorClass(f) + '">' + escapeHtml(f) + '</span>'; }).join('')
         : '<span class="tag">—</span>';
       var entregasTxt = w.entregas.length ? w.entregas.join(' • ') : '—';
       return (
@@ -246,7 +265,7 @@
       '<div class="task-card">' +
         '<div class="task-card-head">' +
           '<div>' +
-            '<div class="task-frente">' + escapeHtml(t.frente) + '</div>' +
+            '<div class="task-frente c-' + frenteColorClass(t.frente) + '">' + escapeHtml(t.frente) + '</div>' +
             '<div class="task-name">' + escapeHtml(t.tarefa) + '</div>' +
             '<div class="task-entregavel">' + escapeHtml(t.entregavel || '') + '</div>' +
           '</div>' +
@@ -326,7 +345,7 @@
         '<tr>' +
           '<td class="col-date" data-label="Início">' + fmtFull(di) + '</td>' +
           '<td class="col-date" data-label="Fim">' + fmtFull(df) + '</td>' +
-          '<td data-label="Frente">' + escapeHtml(t.frente) + '</td>' +
+          '<td data-label="Frente"><span class="task-frente c-' + frenteColorClass(t.frente) + '" style="margin:0">' + escapeHtml(t.frente) + '</span></td>' +
           '<td data-label="Tarefa">' + escapeHtml(t.tarefa) + '</td>' +
           '<td data-label="Entregável">' + escapeHtml(t.entregavel || '') + '</td>' +
           '<td data-label="Prioridade"><span class="pill ' + prioClass(t.prioridade) + '">' + escapeHtml(t.prioridade || '—') + '</span></td>' +
